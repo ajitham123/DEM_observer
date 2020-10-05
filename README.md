@@ -1,6 +1,6 @@
 # DEM_observer
 
-This is the MATLAB code for the paper: 
+This MATLAB code performs the state and input estimation for a linear state space system with coloured noise using the Free energy principle from neuroscience. This is based on the paper:
 
 A. A. Meera and M. Wisse, "**Free Energy Principle Based State and Input Observer Design for Linear Systems with Colored Noise**," 2020 American Control Conference (ACC), Denver, CO, USA, 2020, pp. 5052-5058, doi: 10.23919/ACC45564.2020.9147581.
 
@@ -8,9 +8,7 @@ A. A. Meera and M. Wisse, "**Free Energy Principle Based State and Input Observe
 
 In order to simulate it, run DEM_observer.m file.
 
-'model' structure represents the generative process 
-
-'brain' structure represeants the generative model
+The *model* structure represents the generative process, while the *brain* structure represeants the generative model. 
 
 ## List of variable names and their meanings
 
