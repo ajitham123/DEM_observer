@@ -12,22 +12,22 @@ In order to simulate it, run DEM_observer.m file.
 
 **List of variable names and their meanings**
 
- Tt                Time vector (starting from 0)
- model.t           Time vecotor starting from sampling time
- model.sam_time    Sampling time
- model.real_cause  System input (measured) - nv*nt matrix
- model.process_x   States state (only used for plotting) - nt*nx matrix
- model.process_y   System output (measured)    - nt*ny matrix
- model.A           A matrix - nx*nx matrix
- model.B           B matrix - nx*nv matrix
- model.C           C matrix - ny*nx matrix
- model.s           Noise smoothness
- model.p           Embedding order of states
- model.d           Embedding order of imputs
- model.sigma_w     Standard deviation of state noise
- model.sigma_z     Standard deviation of observation noise
+ * Tt                Time vector (starting from 0)
+ * model.t           Time vecotor starting from sampling time
+ * model.sam_time    Sampling time
+ * model.real_cause  System input (measured) - nv*nt matrix
+ * model.process_x   States state (only used for plotting) - nt*nx matrix
+ * model.process_y   System output (measured)    - nt*ny matrix
+ * model.A           A matrix - nx*nx matrix
+ * model.B           B matrix - nx*nv matrix
+ * model.C           C matrix - ny*nx matrix
+ * model.s           Noise smoothness
+ * model.p           Embedding order of states
+ * model.d           Embedding order of imputs
+ * model.sigma_w     Standard deviation of state noise
+ * model.sigma_z     Standard deviation of observation noise
 
- brain.nv          Number of inputs
- brain.ny          Number of outputs
- brain.nx          Number of states
- brain.nt          Number of total time steps
+ * brain.nv          Number of inputs
+ * brain.ny          Number of outputs
+ * brain.nx          Number of states
+ * brain.nt          Number of total time steps
