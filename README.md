@@ -8,9 +8,9 @@ A. A. Meera and M. Wisse, "**Free Energy Principle Based State and Input Observe
 
 In order to simulate it, run DEM_observer.m file.
 
-The *model* structure represents the generative process, while the *brain* structure represents the generative model. 
-
 ## List of variable names and their meanings
+
+The *model* structure represents the generative process, while the *brain* structure represents the generative model. 
 
  * Tt:                Time vector (starting from 0)
  * model.t :          Time vecotor starting from sampling time
