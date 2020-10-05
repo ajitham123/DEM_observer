@@ -1,0 +1,153 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The MATLAB code for the D step of DEM given in the paper: 
+%
+%   A. A. Meera and M. Wisse, "Free Energy Principle Based State and Input 
+%   Observer Design for Linear Systems with Colored Noise," 2020 
+%   American Control Conference (ACC), Denver, CO, USA, 2020, 
+%   pp. 5052-5058, doi: 10.23919/ACC45564.2020.9147581.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 'model' structure represents the generative process 
+% 'brain' structure represeants the generative model
+
+% Variable names:
+
+% Tt                Time vector (starting from 0)
+% model.t           Time vecotor starting from sampling time
+% model.sam_time    Sampling time
+% model.real_cause  System input (measured)
+% model.process_x   States state (only used for plotting)
+% model.process_y   System output (measured)
+% model.A           A matrix
+% model.B           B matrix
+% model.C           C matrix
+% model.s           Noise smoothness
+% model.p           Embedding order of states
+% model.d           Embedding order of imputs
+% model.sigma_w     Standard deviation of state noise
+% model.sigma_z     Standard deviation of observation noise
+
+% brain.nv          Number of inputs
+% brain.ny          Number of outputs
+% brain.nx          Number of states
+% brain.nt          Number of total time steps
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear; 
+close all;
+clc;
+
+% Choose whether inputs should also be estimated or not
+% 0: inputs should be estimated
+% 1: inputs are known
+if_cause = 0;
+
+if_dataset = 0;         % 0 for synthetic data and 1 for motor data
+if_predict_y = 0;       % 
+if_UIO = 0;             % 1 to use UIO. Might need additional software installation.
+UIO_gamma = 125;
+UIO_gains = [1200 1200 1200 1400 1500];
+
+
+%% Get model and corresponding flight data
+
+if if_dataset   % motor dataset
+    [Tt,model.real_cause,model.process_x,model.process_y,ideal_y,current,...
+        voltage,model.sam_time,model.A,model.B,model.C] = DC_motor_data;
+    model.ideal_x = model.process_x;
+    model.t_end = Tt(end) + model.sam_time;
+    model.t = Tt + model.sam_time;
+    
+    model.s = 0.01 + exp(-16); % for motor data   
+    model.p = 6; %embedding order states in model
+    model.d = 2; %embedding order inputs in model
+    brain.p = 5; %embedding order states
+    brain.d = 2; %embedding order inputs
+    model.sigma_w = exp(-6);                    % set it as exp(-6) for motor data
+    model.sigma_z = exp(-13);                   % set it as exp(-13) for motor data
+
+else
+    model.sam_time = .1;
+    model.t_end = 32;
+    Tt  = 0:model.sam_time:model.t_end-model.sam_time;
+    model.t = Tt + model.sam_time;  
+    model.real_cause = exp(-.25*(model.t-12).^2);
+ 
+    % set model parameters
+    model.A = [-.25 1; -.5 -.25];
+    model.B = [1; 0];
+    model.C = [.125 .1633; .125 .0676; .125 -.0676; .125 -.1633];
+    
+    model.p = 6; %embedding order states in model
+    model.d = 2; %embedding order inputs in model
+    brain.p = 6; %embedding order states
+    brain.d = 2; %embedding order inputs
+    
+    % set noise properties 
+    model.s = 0.5;                  % noise smoothness
+    model.sigma_w = exp(-4);        % standard deviation of process noise
+    model.sigma_z = exp(-4);        % standard deviation of observation noise
+end
+
+brain.nv      = size(model.B,2);
+brain.ny      = size(model.C,1);
+brain.nt      = size(model.t,2);
+
+
+%% Set noise properties
+% Kernel width 
+brain.s =  model.s;
+brain.prior_cause = 0.5*ones(brain.nv,brain.nt);    % prior cause for DEM is set as 0.5
+
+% Standard deviations 
+brain.sigma_v = exp(4);                             %prior of standard deviation of input 
+brain.sigma_w = model.sigma_w;
+brain.sigma_z = model.sigma_z;
+
+
+%% Generate the 
+[model,brain] = generative_process(model,brain,if_dataset);
+brain.Y_embed = generalized_process(model.process_y,brain.prior_cause,...
+                                    model.t,model.sam_time,...
+                                    brain.nv,brain.ny,brain.p,brain.d);
+
+
+%% Run filters
+output = observer(model,brain,if_UIO,UIO_gamma,if_cause,if_dataset,...
+                  if_predict_y);
+
+
+%% Get estimation error
+if_t_trim = 1;% 1: trim out estimates at both ends (inaccurate derivatives)
+if if_t_trim == 1
+    t_trim = brain.p+2:brain.nt-brain.p-2;
+else 
+    t_trim = 1:brain.nt;
+end
+
+SSE.DEM.x	 = sum(sum((output.DEM_x(t_trim,1:brain.nx)-...
+                        model.ideal_x(t_trim,:)).^2));
+SSE.kalman.x = sum(sum((output.kalman_x(:,t_trim)'-...
+                        model.ideal_x(t_trim,:)).^2));
+SSE.DEM.v    = sum(sum((output.DEM_x(t_trim,brain.nx*(brain.p+1)+1)-...
+                        model.real_cause(:,t_trim)').^2));
+
+if if_cause == 1
+    SSE.DEMv.x	  = sum(sum((output.DEMv_x(t_trim,1:brain.nx)-...
+                             model.ideal_x(t_trim,:)).^2));
+    SSE.kalmanv.x = sum(sum((output.kalmfv_x(:,t_trim)'-...
+                             model.ideal_x(t_trim,:)).^2));
+end
+
+if if_UIO == 1
+    SSE.UIO.x = sum(sum((output.UIO_x_est(:,t_trim)-...
+                         model.ideal_x(t_trim,:)').^2));
+    SSE.UIO.v = sum((output.UIO_v_est(:,t_trim)-...
+                     model.real_cause(:,t_trim)).^2);
+end
+
+
+%% Plot data
+print_results(SSE,1,1,if_UIO,if_cause);
+plot_results(output,model,brain,if_UIO,if_cause);
