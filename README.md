@@ -10,7 +10,7 @@ In order to simulate it, run DEM_observer.m file.
 'model' structure represents the generative process 
 'brain' structure represeants the generative model
 
-/List of variable names and their meanings/
+**List of variable names and their meanings**
 
  Tt                Time vector (starting from 0)
  model.t           Time vecotor starting from sampling time
