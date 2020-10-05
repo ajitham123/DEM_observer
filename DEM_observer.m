@@ -16,12 +16,12 @@
 % Tt                Time vector (starting from 0)
 % model.t           Time vecotor starting from sampling time
 % model.sam_time    Sampling time
-% model.real_cause  System input (measured)
-% model.process_x   States state (only used for plotting)
-% model.process_y   System output (measured)
-% model.A           A matrix
-% model.B           B matrix
-% model.C           C matrix
+% model.real_cause  System input (measured) - nv*nt matrix
+% model.process_x   States state (only used for plotting) - nt*nx matrix
+% model.process_y   System output (measured)    - nt*ny matrix
+% model.A           A matrix - nx*nx matrix
+% model.B           B matrix - nx*nv matrix
+% model.C           C matrix - ny*nx matrix
 % model.s           Noise smoothness
 % model.p           Embedding order of states
 % model.d           Embedding order of imputs
