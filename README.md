@@ -12,10 +12,10 @@ In order to simulate it, run DEM_observer.m file.
 
 **List of variable names and their meanings**
 
- * Tt                Time vector (starting from 0)
- * model.t           Time vecotor starting from sampling time
- * model.sam_time    Sampling time
- * model.real_cause  System input (measured) - nv*nt matrix
+ * Tt:                Time vector (starting from 0)
+ * model.t :          Time vecotor starting from sampling time
+ * model.sam_time :   Sampling time
+ * model.real_cause :  System input (measured) - nv*nt matrix
  * model.process_x   States state (only used for plotting) - nt*nx matrix
  * model.process_y   System output (measured)    - nt*ny matrix
  * model.A           A matrix - nx*nx matrix
